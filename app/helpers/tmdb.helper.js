@@ -1,19 +1,27 @@
 const tmdbConfig = require("../../config/app.config.js").tmdb;
-var request = require("request-promise");
+const request = require("request-promise");
+let numberOfOngoingRequests = 0;
 
 getMovieByTMDBID = tmdbId => {
-  return request({
-    uri: buildURI(tmdbId),
-    json: true
-  })
+  let timeToWait = numberOfOngoingRequests * 250;
+  numberOfOngoingRequests++;
+  return wait(timeToWait)
+    .then(() =>
+      request({
+        uri: buildURI(tmdbId),
+        json: true
+      })
+    )
     .then(response => {
       if (response.error) {
         throw error;
       } else {
+        numberOfOngoingRequests--;
         return response;
       }
     })
     .catch(error => {
+      numberOfOngoingRequests--;
       if (isLimitError(error)) {
         return wait(getDelay(error)).then(() => getMovieByTMDBID(tmdbId));
       } else {
