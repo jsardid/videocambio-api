@@ -17,7 +17,7 @@ getMovieByTMDBID = tmdbId => {
         throw error;
       } else {
         numberOfOngoingRequests--;
-        return response;
+        return updateKeys(response);
       }
     })
     .catch(error => {
@@ -35,6 +35,12 @@ getMovieByTMDBID = tmdbId => {
       }
     });
 };
+
+updateKeys = movie =>
+  Object.keys(movie).reduce((updatedMovie, originalKey) => {
+    updatedMovie["tmdb_" + originalKey] = movie[originalKey];
+    return updatedMovie;
+  }, {});
 
 buildURI = tmdbId =>
   tmdbConfig.tmdb_api_url +

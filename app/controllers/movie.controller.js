@@ -24,19 +24,19 @@ exports.addMovies = (req, res) => {
 addMovie = movieIDToAdd => {
   return tmdbHelper
     .getMovieByTMDBID(movieIDToAdd)
-    .then(
-      movie => addMovieToDatabase(movie),
-    ).catch(
-      error => error
-    );
+    .then(movie => addMovieToDatabase(movie))
+    .catch(error => error);
 };
 
 addMovieToDatabase = movie =>
-  MovieModel.findOneAndUpdate({ id: movie.id }, movie, { upsert: true })
+  MovieModel.findOneAndUpdate({ tmdb_id: movie.tmdb_id }, movie, {
+    upsert: true,
+    setDefaultsOnInsert: true
+  })
     .then(() => {
       return {
         id: movie.id,
-        title: movie.original_title,
+        title: movie.original_title
       };
     })
     .catch(error => {
@@ -44,7 +44,7 @@ addMovieToDatabase = movie =>
         id: movie.id,
         title: movie.original_title,
         error: {
-          type:'addMovieToDatabase',
+          type: "addMovieToDatabase",
           error_details: error
         }
       };

@@ -1,17 +1,29 @@
 var mongoose = require('mongoose');
 
 var MovieSchema = mongoose.Schema({
-    id: String,
-    title: String,
-    original_title: String,
-    overview: String,
-    popularity: Number,
-    vote_average: Number,
-    vote_count: Number,
-    backdrop_path: String,
-    poster_path: String,
-    release_date: String,
-    runtime: String
+    tmdb_id: String,
+    tmdb_title: String,
+    tmdb_original_title: String,
+    tmdb_overview: String,
+    tmdb_popularity: Number,
+    tmdb_vote_average: Number,
+    tmdb_vote_count: Number,
+    tmdb_backdrop_path: String,
+    tmdb_poster_path: String,
+    tmdb_release_date: String,
+    tmdb_runtime: String,
+    custom_popular: {
+        type: Boolean,
+        default: false
+    },
+    custom_new_release: {
+        type: Boolean,
+        default: false
+    },
+    custom_recently_added: {
+        type: Boolean,
+        default: false
+    },
 }, {
     timestamps: true
 });
