@@ -2,16 +2,28 @@ var MovieModel = require("../models/movie.model.js");
 var tmdbHelper = require("../helpers/tmdb.helper.js");
 
 exports.findAll = (req, res) => {
-  MovieModel.find(function(err, movies) {
-    if (err) {
-      console.log(err);
-      res
-        .status(500)
-        .send({ message: "Some error occurred while retrieving movies." });
-    } else {
-      res.send(movies);
-    }
-  });
+  const limit =
+    (req.query && req.query.limit && parseInt(req.query.limit)) || 0;
+  const offset =
+    (req.query && req.query.offset && parseInt(req.query.offset)) || 0;
+  const query =
+    (req.query &&
+      req.query.title && { $text: { $search: req.query.title } }) ||
+    {};
+
+  MovieModel.find(query)
+    .skip(offset)
+    .limit(limit)
+    .exec(function(err, movies) {
+      if (err) {
+        console.log(err);
+        res
+          .status(500)
+          .send({ message: "Some error occurred while retrieving movies." });
+      } else {
+        res.send(movies);
+      }
+    });
 };
 
 exports.addMovies = (req, res) => {
