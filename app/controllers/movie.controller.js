@@ -35,6 +35,28 @@ exports.addMovies = (req, res) => {
   });
 };
 
+exports.findOne = function(req, res) {
+  MovieModel.find({ tmdb_id: req.params.movieId }, (err, results) => {
+    if (err) {
+      console.log(err);
+      if (err.kind === "ObjectId") {
+        return res
+          .status(404)
+          .send({ message: "Movie not found with id " + req.params.movieId });
+      }
+      return res.status(500).send({
+        message: "Error retrieving movie with id " + req.params.movieId
+      });
+    }
+    if (!results || !results.length) {
+      return res
+        .status(404)
+        .send({ message: "Movie not found with id " + req.params.movieId });
+    }
+    res.send(results[0]);
+  });
+};
+
 addMovie = movieIDToAdd => {
   return tmdbHelper
     .getMovieByTMDBID(movieIDToAdd)
