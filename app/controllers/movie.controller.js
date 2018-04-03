@@ -7,11 +7,13 @@ exports.findAll = (req, res) => {
   const offset =
     (req.query && req.query.offset && parseInt(req.query.offset)) || 0;
   const query =
-    (req.query &&
-      req.query.title && { $text: { $search: req.query.title } }) ||
+    (req.query && req.query.title && { $text: { $search: req.query.title } }) ||
     {};
+  const sort_by =
+    (req.query && req.query.sort_by && { [req.query.sort_by]: "desc" }) || {};
 
   MovieModel.find(query)
+    .sort(sort_by)
     .skip(offset)
     .limit(limit)
     .exec(function(err, movies) {
