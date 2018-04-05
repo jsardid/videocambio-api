@@ -8,7 +8,9 @@ const limiter = new Bottleneck({
 });
 
 exports.getMovieByTMDBID = tmdbId => {
-  return requestTMDB(getRequestOptionsForMovie(tmdbId)).then(updateKeys);
+  return requestTMDB(getRequestOptionsForMovie(tmdbId)).then(
+    mapTMDBPropertiesToCustomDB
+  );
 };
 
 requestTMDB = requestOptions => {
@@ -22,8 +24,10 @@ requestTMDB = requestOptions => {
       }
     })
     .catch(error => {
-      if (isLimitError(error)) {
-        return wait(getDelay(error)).then(() => requestTMDB(requestOptions));
+      if (isRateLimitError(error)) {
+        return wait(getWaitingTimeFromError(error)).then(() =>
+          requestTMDB(requestOptions)
+        );
       } else {
         throw {
           id: tmdbId,
@@ -36,11 +40,19 @@ requestTMDB = requestOptions => {
     });
 };
 
-updateKeys = movie =>
-  Object.keys(movie).reduce((updatedMovie, originalKey) => {
-    updatedMovie["tmdb_" + originalKey] = movie[originalKey];
-    return updatedMovie;
-  }, {});
+mapTMDBPropertiesToCustomDB = movieResource => ({
+  tmdb_id: movieResource.id,
+  tmdb_title: movieResource.title,
+  tmdb_original_title: movieResource.original_title,
+  tmdb_overview: movieResource.overview,
+  tmdb_popularity: movieResource.popularity,
+  tmdb_vote_average: movieResource.vote_average,
+  tmdb_vote_count: movieResource.vote_count,
+  tmdb_backdrop_path: movieResource.backdrop_path,
+  tmdb_poster_path: movieResource.poster_path,
+  tmdb_release_date: movieResource.release_date,
+  tmdb_runtime: movieResource.runtime
+});
 
 getRequestOptionsForMovie = tmdbId => {
   return {
@@ -51,14 +63,15 @@ getRequestOptionsForMovie = tmdbId => {
       "?api_key=" +
       tmdbConfig.tmdb_api_key +
       "&language=" +
-      tmdbConfig.tmdb_api_language,
+      tmdbConfig.tmdb_api_language +
+      "&append_to_response=videos,images,credits",
     json: true
   };
 };
 
-getDelay = error => error.response.headers["retry-after"] * 1000;
+getWaitingTimeFromError = error => error.response.headers["retry-after"] * 1000;
 
-isLimitError = error =>
+isRateLimitError = error =>
   (error !== undefined) &
   (error.error !== undefined) &
   (error.error.status_code === 25);
