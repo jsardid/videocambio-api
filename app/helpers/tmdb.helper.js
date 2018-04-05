@@ -1,12 +1,15 @@
 const tmdbConfig = require("../../config/app.config.js").tmdb;
 const request = require("request-promise");
-let numberOfOngoingRequests = 0;
+const Bottleneck = require("bottleneck");
+
+const limiter = new Bottleneck({
+  maxConcurrent: null,
+  minTime: 300
+});
 
 getMovieByTMDBID = tmdbId => {
-  let timeToWait = numberOfOngoingRequests * 250;
-  numberOfOngoingRequests++;
-  return wait(timeToWait)
-    .then(() =>
+  return limiter
+    .schedule(() =>
       request({
         uri: buildURI(tmdbId),
         json: true
@@ -16,12 +19,10 @@ getMovieByTMDBID = tmdbId => {
       if (response.error) {
         throw error;
       } else {
-        numberOfOngoingRequests--;
         return updateKeys(response);
       }
     })
     .catch(error => {
-      numberOfOngoingRequests--;
       if (isLimitError(error)) {
         return wait(getDelay(error)).then(() => getMovieByTMDBID(tmdbId));
       } else {
