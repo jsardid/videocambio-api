@@ -57,12 +57,11 @@ exports.findOne = function(req, res) {
   });
 };
 
-addMovie = movieIDToAdd => {
-  return tmdbHelper
+addMovie = movieIDToAdd =>
+  tmdbHelper
     .getMovieByTMDBID(movieIDToAdd)
-    .then(movie => addMovieToDatabase(movie))
+    .then(addMovieToDatabase)
     .catch(error => error);
-};
 
 addMovieToDatabase = movie =>
   MovieModel.findOneAndUpdate({ tmdb_id: movie.tmdb_id }, movie, {

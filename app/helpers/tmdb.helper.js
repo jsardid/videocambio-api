@@ -7,24 +7,23 @@ const limiter = new Bottleneck({
   minTime: 300
 });
 
-getMovieByTMDBID = tmdbId => {
+exports.getMovieByTMDBID = tmdbId => {
+  return requestTMDB(getRequestOptionsForMovie(tmdbId)).then(updateKeys);
+};
+
+requestTMDB = requestOptions => {
   return limiter
-    .schedule(() =>
-      request({
-        uri: buildURI(tmdbId),
-        json: true
-      })
-    )
+    .schedule(() => request(requestOptions))
     .then(response => {
       if (response.error) {
         throw error;
       } else {
-        return updateKeys(response);
+        return response;
       }
     })
     .catch(error => {
       if (isLimitError(error)) {
-        return wait(getDelay(error)).then(() => getMovieByTMDBID(tmdbId));
+        return wait(getDelay(error)).then(() => requestTMDB(requestOptions));
       } else {
         throw {
           id: tmdbId,
@@ -43,12 +42,19 @@ updateKeys = movie =>
     return updatedMovie;
   }, {});
 
-buildURI = tmdbId =>
-  tmdbConfig.tmdb_api_url +
-  "movie/" +
-  tmdbId +
-  "?" +
-  tmdbConfig.tmdb_api_params;
+getRequestOptionsForMovie = tmdbId => {
+  return {
+    uri:
+      tmdbConfig.tmdb_api_url +
+      "movie/" +
+      tmdbId +
+      "?api_key=" +
+      tmdbConfig.tmdb_api_key +
+      "&language=" +
+      tmdbConfig.tmdb_api_language,
+    json: true
+  };
+};
 
 getDelay = error => error.response.headers["retry-after"] * 1000;
 
@@ -62,5 +68,3 @@ wait = time => {
     setTimeout(resolve, time);
   });
 };
-
-exports.getMovieByTMDBID = getMovieByTMDBID;
