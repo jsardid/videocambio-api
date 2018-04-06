@@ -34,7 +34,7 @@ var MovieSchema = mongoose.Schema(
     ],
     tmdb_videos: [
       {
-        tmdb_youtube_link: String
+        tmdb_video_key: String
       }
     ]
   },
