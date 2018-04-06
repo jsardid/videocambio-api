@@ -8,9 +8,9 @@ const limiter = new Bottleneck({
 });
 
 exports.getMovieByTMDBID = tmdbId => {
-  return requestTMDB(getRequestOptionsForMovie(tmdbId)).then(
-    mapTMDBPropertiesToCustomDB
-  );
+  return requestTMDB(getRequestOptionsForMovie(tmdbId)).then(response => {
+    return mapTMDBPropertiesToCustomDB(response);
+  });
 };
 
 requestTMDB = requestOptions => {
@@ -51,7 +51,17 @@ mapTMDBPropertiesToCustomDB = movieResource => ({
   tmdb_backdrop_path: movieResource.backdrop_path,
   tmdb_poster_path: movieResource.poster_path,
   tmdb_release_date: movieResource.release_date,
-  tmdb_runtime: movieResource.runtime
+  tmdb_runtime: movieResource.runtime,
+  tmdb_cast: movieResource.credits.cast.map(cast => ({
+    tmdb_name: cast.name,
+    tmdb_character: cast.character,
+    tmdb_profile_path: cast.profile_path
+  })),
+  tmdb_videos: movieResource.videos.results
+    .filter(video => video.site === "YouTube")
+    .map(video => ({
+      tmdb_video_key: video.key
+    }))
 });
 
 getRequestOptionsForMovie = tmdbId => {
