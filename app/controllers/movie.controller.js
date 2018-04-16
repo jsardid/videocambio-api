@@ -7,7 +7,20 @@ exports.findAll = (req, res) => {
   const offset =
     (req.query && req.query.offset && parseInt(req.query.offset)) || 0;
   const query =
-    (req.query && req.query.title && { $text: { $search: req.query.title } }) ||
+    (req.query &&
+      req.query.title && {
+        tmdb_title: {
+          $regex: new RegExp(
+            req.query.title
+              .replace(/a|á|A|Á/g, "[aáAÁ]")
+              .replace(/e|é|E|É/g, "[eéEÉ]")
+              .replace(/i|í|I|Í/g, "[iíIÍ]")
+              .replace(/o|ó|O|Ó/g, "[oóOÓ]")
+              .replace(/u|ú|U|Ú/g, "[uúUÚ]"),
+            "i"
+          )
+        }
+      }) ||
     {};
   const sort_by =
     (req.query && req.query.sort_by && { [req.query.sort_by]: "desc" }) || {};
