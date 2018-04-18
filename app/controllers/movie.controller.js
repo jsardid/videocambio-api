@@ -9,17 +9,18 @@ exports.findAll = (req, res) => {
   const query =
     (req.query &&
       req.query.title && {
-        tmdb_title: {
-          $regex: new RegExp(
-            req.query.title
-              .replace(/a|á|A|Á/g, "[aáAÁ]")
-              .replace(/e|é|E|É/g, "[eéEÉ]")
-              .replace(/i|í|I|Í/g, "[iíIÍ]")
-              .replace(/o|ó|O|Ó/g, "[oóOÓ]")
-              .replace(/u|ú|U|Ú/g, "[uúUÚ]"),
-            "i"
-          )
-        }
+        $and: req.query.title
+          .replace(/,/g, " ")
+          .trim()
+          .replace(/a|á|A|Á/g, "[aáAÁ]")
+          .replace(/e|é|E|É/g, "[eéEÉ]")
+          .replace(/i|í|I|Í/g, "[iíIÍ]")
+          .replace(/o|ó|O|Ó/g, "[oóOÓ]")
+          .replace(/u|ú|U|Ú/g, "[uúUÚ]")
+          .split(" ")
+          .map(word => {
+            return { tmdb_title: { $regex: new RegExp(word, "i") } };
+          })
       }) ||
     {};
   const sort_by =
