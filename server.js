@@ -4,14 +4,14 @@ const mongoose = require("mongoose");
 const dbConfig = require("./config/database.config.js");
 const routes = require("./app/routes/movie.routes.js");
 
-//process.env.http_proxy = "http://127.0.0.1:8888";
-//process.env.https_proxy = "http://127.0.0.1:8888";
-//process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+// process.env.http_proxy = "http://127.0.0.1:8888";
+// process.env.https_proxy = "http://127.0.0.1:8888";
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 // create express app
 const app = express();
 
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   next();
 });
@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 // Use native promises
 mongoose.Promise = global.Promise;
 
-//Configure DataBase
+// Configure DataBase
 mongoose.connect(dbConfig.url);
 
 mongoose.connection.on("error", () => {

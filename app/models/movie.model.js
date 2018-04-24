@@ -1,6 +1,6 @@
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-var MovieSchema = mongoose.Schema(
+const MovieSchema = mongoose.Schema(
   {
     custom_popular: {
       type: Boolean,
