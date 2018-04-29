@@ -36,8 +36,8 @@ const getRequestOptionsForMovie = tmdbId => ({
     tmdbConfig.tmdb_api_key
   }&language=${
     tmdbConfig.tmdb_api_language
-  }&append_to_response=videos,images,credits"
-    `,
+  }&append_to_response=videos,images,credits
+  `,
   json: true
 });
 

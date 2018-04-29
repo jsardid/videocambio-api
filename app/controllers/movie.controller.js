@@ -7,13 +7,13 @@ const addMovieToDatabase = movie =>
     setDefaultsOnInsert: true
   })
     .then(() => ({
-      id: movie.id,
-      title: movie.original_title
+      id: movie.tmdb_id,
+      title: movie.tmdb_original_title
     }))
     .catch(error => {
       throw new Error({
-        id: movie.id,
-        title: movie.original_title,
+        id: movie.tmdb_id,
+        title: movie.tmdb_original_title,
         error: {
           type: "addMovieToDatabase",
           error_details: error
